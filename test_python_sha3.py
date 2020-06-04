@@ -12,13 +12,13 @@ def main():
                             python_sha3.sha3_384, python_sha3.sha3_512]
   # pysha3
   pysha3_hashes = [hashlib.sha3_224, hashlib.sha3_256, hashlib.sha3_384, hashlib.sha3_512]
-
-  for i,j in zip(python_sha3_functions, pysha3_hashes):
-    for x in range(1000):
-      x = str(x)
-      if i(x).hexdigest() != j(x).hexdigest():
-        print (x)
-        return
+  x = "z"
+  instance = python_sha3.sha3_224(x)
+  M = (len(x.encode('hex')) * 4, x.encode('hex'))
+  print(M)
+  print(instance.pad10star1(M, 1152))
+  print(len(instance.pad10star1(M, 1152)))
+  print(python_sha3.sha3_224(x).hexdigest())
         
 if __name__ == '__main__':
   main()
