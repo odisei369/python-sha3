@@ -187,7 +187,6 @@ class Keccak:
     """
 
     [my_string_length, my_string] = M
-
     # Check the parameter n
     if n % 8 != 0:
       raise KeccakError.KeccakError("n must be a multiple of 8")
@@ -200,32 +199,17 @@ class Keccak:
     if my_string_length > (len(my_string) // 2 * 8):
       raise KeccakError.KeccakError("the string is too short to contain the number of bits announced")
 
-    # nr_bytes_filled = my_string_length // 8
-    # nbr_bits_filled = my_string_length % 8
-    # l = my_string_length % n
-    # if ((n - 8) <= l <= (n - 2)):
-    #   if (nbr_bits_filled == 0):
-    #     my_byte = 0
-    #   else:
-    #     my_byte = int(my_string[nr_bytes_filled * 2:nr_bytes_filled * 2 + 2], 16)
-    #   my_byte = (my_byte >> (8 - nbr_bits_filled))
-    #   my_byte = my_byte + 2 ** (nbr_bits_filled) + 2 ** 7
-    #   my_byte = "%02X" % my_byte
-    #   my_string = my_string[0:nr_bytes_filled * 2] + my_byte
-    # else:
-    #   if (nbr_bits_filled == 0):
-    #     my_byte = 0
-    #   else:
-    #     my_byte = int(my_string[nr_bytes_filled * 2:nr_bytes_filled * 2 + 2], 16)
-    #   my_byte = (my_byte >> (8 - nbr_bits_filled))
-    #   my_byte = my_byte + 2 ** (nbr_bits_filled)
-    #   my_byte = "%02X" % my_byte
-    #   my_string = my_string[0:nr_bytes_filled * 2] + my_byte
-    my_string = my_string + '06'
-    while(8 * len(my_string)  < n - 2):
-      my_string = my_string + '00'
-    my_string = my_string + '80'
 
+    q = (n / 8) - (my_string_length % (n / 8))
+    if q == 1:
+      my_string = my_string + '86'
+    elif q == 2:
+      my_string = my_string + '0680'
+    else:
+      my_string = my_string + '06'
+      while(4 * len(my_string) < (n - 8)):
+        my_string = my_string + '00'
+      my_string = my_string + '80'
     return my_string
 
   def update(self, arg):
@@ -241,6 +225,7 @@ class Keccak:
 
       # An exact fit!
       if extra_bits == 0:
+        print("An exact fit!!!!")
         P = self.buffered_data
         self.buffered_data = ""
       else:
@@ -274,6 +259,9 @@ class Keccak:
     M = _build_message_pair(self.buffered_data.decode('hex'))
 
     # First finish the padding and force the final update:
+    padded = Keccak.pad10star1(M, self.r)
+    print("padded length")
+    print(len(padded))
     self.buffered_data = Keccak.pad10star1(M, self.r)
     self.update('')
     # UGLY WARNING over
