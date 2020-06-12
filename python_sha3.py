@@ -112,11 +112,17 @@ class Keccak:
         0x8000000080008008]
 
   ## Rotation offsets
-  r = [[0,  36,   3,  41,  18],
-       [1,  44,  10,  45,   2],
-       [62,  6,  43,  15,  61],
-       [28, 55,  25,  21,  56],
-       [27, 20,  39,   8,  14]]
+  # r = [[0,  36,   3,  41,  18],
+  #      [1,  44,  10,  45,   2],
+  #      [62,  6,  43,  15,  61],
+  #      [28, 55,  25,  21,  56],
+  #      [27, 20,  39,   8,  14]]
+
+  r = [[0,  36,   3,  105,  210],
+       [1,  300,  10,  45,   66],
+       [190,  6,  171,  15,  253],
+       [28, 55,  153,  21,  120],
+       [91, 276,  231,   136,  78]]
 
   @staticmethod
   def Round(A, RCfixed, w):
@@ -199,9 +205,11 @@ class Keccak:
     if my_string_length > (len(my_string) // 2 * 8):
       raise KeccakError.KeccakError("the string is too short to contain the number of bits announced")
 
+    while my_string_length >= n:
+      n = n + n
 
     q = (n / 8) - (my_string_length % (n / 8))
-    if q == 1:
+    if q == 1 or my_string_length + 8 == n:
       my_string = my_string + '86'
     elif q == 2:
       my_string = my_string + '0680'
@@ -225,7 +233,6 @@ class Keccak:
 
       # An exact fit!
       if extra_bits == 0:
-        print("An exact fit!!!!")
         P = self.buffered_data
         self.buffered_data = ""
       else:
@@ -260,8 +267,6 @@ class Keccak:
 
     # First finish the padding and force the final update:
     padded = Keccak.pad10star1(M, self.r)
-    print("padded length")
-    print(len(padded))
     self.buffered_data = Keccak.pad10star1(M, self.r)
     self.update('')
     # UGLY WARNING over
